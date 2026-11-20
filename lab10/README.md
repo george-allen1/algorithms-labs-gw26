@@ -19,12 +19,12 @@ algorithm.
 | File | Your work |
 |---|---|
 | `README.md` | Complete the short traces and analysis questions |
-| `weighted_graphs.py` | Complete the two implementation TODOs |
+| `weighted_graphs.py` | Complete the two implementations |
 | `min_priority_queue.py` | Provided priority queue |
 | `lab_checks.py` | Provided automated checks |
 
-- [ ] Part 1: Trace and implement Prim's algorithm.
-- [ ] Part 2: Trace and implement Dijkstra's algorithm, then compare the two.
+- [x] Part 1: Trace and implement Prim's algorithm.
+- [x] Part 2: Trace and implement Dijkstra's algorithm, then compare the two.
 
 Vertices are numbered `0` through `n - 1`. Each entry in `graph[u]` is a
 pair `(v, weight)`. For an undirected edge, both directions appear in the
@@ -111,26 +111,30 @@ a disconnected graph.
 
 ### 1.1 Trace: Which connection improves?
 
-**TODO 1.1:** Continue from the state after removing `A`. Fill each row
+**1.1:** Continue from the state after removing `A`. Fill each row
 **after** checking the removed vertex's neighbors. An edge is written
 using its two endpoint labels.
 
 | Vertex removed | Edge added | `key[D]` | `key[E]` |
 |---|---|---|---|
-| `B` | TODO | TODO | TODO |
-| `C` | TODO | TODO | TODO |
-| `D` | TODO | TODO | TODO |
+| `B` | `A--B` | 4 | infinity |
+| `C` | `B--C` | 4 | 6 |
+| `D` | `B--D` | 4 | 6 |
 
-1. Which vertex becomes `C`'s parent, and what causes the change? 
+1. Which vertex becomes `C`'s parent, and what causes the change?
+   `B` becomes `C`'s parent because the edge `B--C` has weight 1, which is
+   less than `C`'s existing key of 3 from `A`.
 
 
 2. After removing `E`, what are the tree's four edges and total weight? 
+   The edges are `A--B` (2), `B--C` (1), `B--D` (4), and `C--E` (6), with
+   total weight 13.
 
 
 
 ### 1.2 Implementation
 
-**TODO 1.2:** Complete `prim` in `weighted_graphs.py` using the pseudocode.
+**1.2:** Complete `prim` in `weighted_graphs.py` using the pseudocode.
 Return `(parent, total_weight)`. The starting vertex's parent stays `None`.
 For example, `parent[2] = 1` represents the tree edge `B--C`.
 
@@ -193,41 +197,49 @@ path, follow its parents back to the source and reverse that sequence.
 
 ### 2.1 Trace: Does the route improve?
 
-**TODO 2.1:** Use source `A` and the same graph. Complete these selected
+**2.1:** Use source `A` and the same graph. Complete these selected
 relaxations in execution order. Record the distance and parent of `v`
 after each check, including checks that leave them unchanged.
 
 | Edge checked | Candidate | Distance of `v` | Parent of `v` |
 |---|---|---|---|
-| `B -> C` | TODO | TODO | TODO |
-| `C -> D` | TODO | TODO | TODO |
-| `C -> E` | TODO | TODO | TODO |
-| `D -> E` | TODO | TODO | TODO |
+| `B -> C` | 3 | 3 | `A` |
+| `C -> D` | 8 | 6 | `B` |
+| `C -> E` | 9 | 9 | `C` |
+| `D -> E` | 13 | 9 | `C` |
 
 Give the final distance array and the shortest path from `A` to `E`:
 
- **TODO**
+ The final distance array is `[0, 2, 3, 6, 9]`. The shortest path from `A`
+ to `E` is `A -> C -> E`.
 
 ### 2.2 Implementation
 
-**TODO 2.2:** Complete `dijkstra` in `weighted_graphs.py`. Return
+**2.2:** Complete `dijkstra` in `weighted_graphs.py`. Return
 `(distance, parent)`. Assume a nonempty graph, a valid source, and
 nonnegative weights. The function should work for directed and
 undirected graphs, including graphs with unreachable vertices.
 
 ### 2.3 Compare and analyze
 
-**TODO 2.3:** Answer briefly.
+**2.3:** Answer briefly.
 
 1. Change only the weight of `A--C` to `2.5`. Starting from `A`, what is
    `C`'s parent under each algorithm? What quantity does each algorithm
    minimize? 
+   Under Prim, `C`'s parent is `B`: Prim minimizes the next edge from the
+   tree to an outside vertex. Under Dijkstra, `C`'s parent is `A`: Dijkstra
+   minimizes the total source-to-vertex path length.
 
 
 2. Consider the directed edges `S -> A: 2`, `S -> B: 5`, and `B -> A: -4`.
    Starting from `S`, which distance does Dijkstra finalize too early?
    Give the actual shortest distance and explain why the negative edge
    causes a problem.
+   Dijkstra finalizes `A` at distance 2, before considering `B -> A`.
+   The actual shortest distance is 1 (`S -> B -> A`: 5 - 4). The negative
+   edge violates Dijkstra's nonnegative-edge assumption and can improve a
+   vertex after Dijkstra has already removed it.
 
 
 3. Let `V` and `E` be the numbers of vertices and edges. For the provided
@@ -237,6 +249,15 @@ undirected graphs, including graphs with unreachable vertices.
    auxiliary space bounds. Exclude the input graph from space. What is
    the time bound if finding the minimum instead scans an unsorted array
    of vertices?
+   Both algorithms remove at most `V` vertices. Prim can have at most `E`
+   successful decreases (each edge of the undirected graph may be considered
+   from two adjacency entries), and Dijkstra can have at most `E`
+   successful relaxations/decreases. With the heap, both therefore take
+   `O(V log V + E log V) = O((V + E) log V)` time and use `O(V)` auxiliary
+   space for the arrays and heap.
+
+   With an unsorted-array minimum scan, both take `O(V^2 + E)` time:
+   `V` removals cost `O(V)` each, while relaxing the edges remains `O(E)`.
 
 
 ---
